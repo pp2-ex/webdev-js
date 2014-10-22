@@ -391,6 +391,40 @@ var x; // Declare x
 
 </section>
 
+<!-------- chapter: minimal style guide ----------------->
+
+<section data-markdown><script type="text/template">
+## Language rules 
+
+* <span style="color: green">always</span>
+ - `var`
+ - `;`
+* <span style="color: red">no</span>
+ - `eval,with`
+ - modification of builtin Objects (`Object.prototype`)
+* <span style="color:orange">use sparingly</span>
+ - `for-in` (only for map/hash/associative arrays)
+ - `this` (constructor, methods assignment)
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Style tips
+
+* [C++/Java rules](https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml)
+ - `functionNamesLikeThis, variableNamesLikeThis, ClassNamesLikeThis`
+ - `function () {`
+* name your anounymous functions ➙ debugging
+* avoid `new Object` (➙ `{}`) && `new Array`(➙ `[]`)
+ 
+<br>
+
+➙ [style guides](https://github.com/rwaldron/idiomatic.js)
+
+### BE CONSISTENT
+</script></section>
+
+<!-------- chapter: minimal event intro  ----------------->
+
 <section data-markdown><script type="text/template">
 ##  Events
 
@@ -454,37 +488,7 @@ Q.all(evts).then(function(dat){
 
 </script></section>
 
-<!-------- chapter: minimal style guide ----------------->
 
-<section data-markdown><script type="text/template">
-## Language rules 
-
-* <span style="color: green">always</span>
- - `var`
- - `;`
-* <span style="color: red">no</span>
- - `eval,with`
- - modification of builtin Objects (`Object.prototype`)
-* <span style="color:orange">use sparingly</span>
- - `for-in` (only for map/hash/associative arrays)
- - `this` (constructor, methods assignment)
-</script></section>
-
-<section data-markdown><script type="text/template">
-## Style tips
-
-* [C++/Java rules](https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml)
- - `functionNamesLikeThis, variableNamesLikeThis, ClassNamesLikeThis`
- - `function () {`
-* name your anounymous functions ➙ debugging
-* avoid `new Object` (➙ `{}`) && `new Array`(➙ `[]`)
- 
-<br>
-
-➙ [style guides](https://github.com/rwaldron/idiomatic.js)
-
-### BE CONSISTENT
-</script></section>
 
 <!-------- chapter: good parts  ----------------->
 
