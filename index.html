@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Intro to web development</title>
+
+    <link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+	<!--<link rel="stylesheet" href="reveal.js/css/print/pdf.min.css"> -->
+
+	<link rel="stylesheet" href="reveal.js/css/theme/sky.css" id="theme">
+
+	<!-- For syntax highlighting -->
+	<link rel="stylesheet" href="external/zenburn.css">
+
+    <link rel="stylesheet" href="external/little-console.css" id="theme">
+	<link rel="stylesheet" href="custom.css" id="theme">
+	<link rel='shortcut icon' type='image/x-icon' href='favicon.ico' />
+
+
+</head>
+
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<section>
+<span data-markdown>
+<script type="text/template">
+# Intro to web development
+
+## Part II: ECMAScript
+
+</script>
+</span>
+<span id="antimail"></span>
+<script type="text/javascript">
+function antimail(name,domain,tld,subject){
+	var a = document.createElement("a");
+	var mail = name + "@" + domain + "." + tld;
+	a.href = "mailto:" + mail;
+	a.textContent = mail;
+	return a;
+}
+document.getElementById("antimail").appendChild(antimail("seb","wilzba", "ch"));
+</script>
+</section>
+
+<section data-markdown data-state="rev-bg-red"><script type="text/template">
+## Design flaws 
+
+* global variables `var`
+* single-threaded (➙ WebWorker)
+* ...
+</script></section>
+
+<section> <div data-markdown>
+<script type="text/template">
+## Type coersion 
+
+```
+'' == '0'          // false
+0 == ''            // true
+0 == '0'           // true
+
+false == 'false'   // false
+false == '0'       // true
+true == '1'        // true
+
+false == undefined // false
+false == null      // false
+null == undefined  // true
+
+' \t\r\n ' == 0    // true
+```
+
+</script></div>
+
+<div style="text-align: left">
+	➙ always use <code>===</code>
+</div>
+<br />  
+
+<div data-markdown>
+`==` is weakly-typed and __slower__ than `===`
+</div>
+<div class=little-console></div>
+</section>
+
+<section data-markdown><script type="text/template">
+
+### NAN 
+
+```
+NaN === NaN    // false
+NaN !== NaN   // true
+```
+
+<br />
+
+### null and undefined
+
+```
+typeof null;       // object
+typeof undefined;  // undefined
+```
+
+</script></section>
+
+<section><div data-markdown><script type="text/template">
+## Javascript type table 
+
+```
+Value               Class      Type
+-------------------------------------
+"foo"               String     string
+new String("foo")   String     object
+1.2                 Number     number
+new Number(1.2)     Number     object
+true                Boolean    boolean
+new Boolean(true)   Boolean    object
+new Date()          Date       object
+new Error()         Error      object
+[1,2,3]             Array      object
+new Array(1, 2, 3)  Array      object
+new Function("")    Function   function
+/abc/g              RegExp     object (function in Nitro/V8)
+new RegExp("meow")  RegExp     object (function in Nitro/V8)
+{}                  Object     object
+new Object()        Object     object
+```
+
+useful:
+
+```
+typeof foo !== 'undefined'
+```
+</script></div>
+<div class=little-console></div>
+</section>
+
+
+<section data-markdown><script type="text/template">
+## Instanceof
+
+with native types:
+
+```
+new String('foo') instanceof String; // true
+new String('foo') instanceof Object; // true
+
+'foo' instanceof String; // false
+'foo' instanceof Object; // false
+```
+
+<br>
+
+➙ use `instanceof` only for custom objects
+
+```
+new Bar() instanceof Foo; // true
+```
+</script></section>
+
+
+<!-- END: instance + types -->
+
+<section data-markdown><script type="text/template">
+## Semicolon insertion
+  
+```
+function(){
+	return
+	1 + 2
+}
+```
+
+➙ 
+
+```
+function(){
+	return;
+	1 + 2;
+}
+```
+
+➙ always use <span style="color:red">`;`</span>
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Block-less JS
+
+```
+if (true)
+ doThis()
+ doThat()
+```
+
+➙
+
+```
+if (true) {
+ doThis();
+}
+doThat();
+```
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Iterators
+
+_Simple_ `for` _loop_
+
+```
+for(var i = 0; i < arr.length; i++){
+	console.log(arr[i]);
+}
+```
+
+_forEach_
+
+```
+arr.forEach(function(entry){
+	console.log(entry);
+});
+```
+
+_for-in_
+
+```
+for(var key in arr){
+	console.log(arr[key]);
+}
+```
+
+</script></section>
+<section data-markdown><script type="text/template">
+
+### Attention: 
+  
+<br>
+
+_for-in_
+
+* slow
+* enumerates all the properties on the prototype chain 
+
+```
+if (arr.hasOwnProperty(key){
+
+}
+```
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+##  `eval` && `void`
+
+* `eval`
+ - insecure
+ - super inefficient 
+ 
+ * `void(arg)` ➙ `undefined` (useless)  
+  
+<br>
+Be aware:  
+
+  `setTimeout` and `setInterval` accept strings and eval them internally.
+
+</script></section>
+<section data-markdown><script type="text/template">
+## with
+
+* unpredictable
+* slow
+
+```
+with (obj) {
+    a = b;
+}
+```
+
+```
+a = b;
+a = obj.b;
+obj.a = b;
+obj.a = obj.b;
+```
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## `this` scope
+
+```
+var obj = {
+ inner: "word",
+ hi: function(name){
+	console.log(this.inner, name);
+ }
+}
+```  
+1,2) Method calls
+
+```
+obj.hi("rost"); // method call
+var m = obj.hi; m("rost")  // baseless method call  -> undefined
+```
+
+3,4) Call, Apply
+
+```
+obj.hi.call({inner: "bword"}, "rost");
+obj.hi.apply(obj, ["rost"]); 
+```
+
+CS / ES6:  `=>`
+
+</script></section>
+<section data-markdown><script type="text/template">
+
+## `this` scope
+
+5) Constructor
+
+```
+var obj = function(){
+ this.inner = "word"
+ this.hi = function(name){
+	console.log(this.inner, name);
+ }
+}
+
+new obj.hi() 
+```
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Scope tricks  
+   
+* bind the scope
+
+```
+method.bind(instance);
+```
+ 
+* save the scope
+
+```
+function(){
+	var self = this;
+	foo.on("click", function(evt){
+		console.log(this,self);
+	}
+}
+```  
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Hoisting  
+  
+```
+x = 5; // Assign 5 to x
+
+elem = document.getElementById("demo"); // Find an element 
+elem.innerHTML = x;                     // Display x in the element
+
+var x; // Declare x
+```  
+  
+(only for `var` declarations)
+</script></section>
+
+<section><div data-markdown><script type="text/template">
+## Other pitfalls
+  
+* new WebAPIs (e.g. FileAPI, LocalStorage, ... )
+* IE <= 10
+* setTimeout(..., 0) has a delay
+* new Date().getMonth() (0: January)
+* `arguments`
+ - `Array.prototype.slice.call(arguments)`
+</script></div>
+<br>
+<div class=little-console></div>
+</section>
+
+<section data-markdown data-background="#545454">
+
+</section>
+
+<section data-markdown><script type="text/template">
+##  Events
+
+* trickling = capturing: root -> leaf
+* bubbling: leaf -> root
+   
+<img src=img/bubbling.jpg />
+<span style="font-size: 0.5em; display:block">&copy; yuiblog.com</span>
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Events
+  
+__Callbacks__
+
+```
+var fs = require('fs');
+
+fs.readFile('file.txt', 'utf8', function(err, data) {
+    if (err) throw err;     
+    console.log('File has been read:', data);
+});
+```
+
+Problems:
+
+ * concurrency
+ * callback hell
+
+
+</script></section>
+<section data-markdown><script type="text/template">
+## Events
+  
+__Promises__
+
+```
+asyncCall()
+.then(function(data1){
+    // do something...
+    return anotherAsyncCall();
+})
+.then(function(data3){
+   // the third and final async response
+})
+.fail(function(err) {
+   // handle any error resulting from any of the above calls    
+})
+```
+
+
+```
+Q.all(evts).then(function(dat){
+	// waited for all events to finish
+});
+
+```
+
+\+ [__Streams__](https://github.com/maxogden/art-of-node#streams)
+
+</script></section>
+
+<!-------- chapter: minimal style guide ----------------->
+
+<section data-markdown><script type="text/template">
+## Language rules 
+
+* <span style="color: green">always</span>
+ - `var`
+ - `;`
+* <span style="color: red">no</span>
+ - `eval,with`
+ - modification of builtin Objects (`Object.prototype`)
+* <span style="color:orange">use sparingly</span>
+ - `for-in` (only for map/hash/associative arrays)
+ - `this` (constructor, methods assignment)
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Style tips
+
+* [C++/Java rules](https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml)
+ - `functionNamesLikeThis, variableNamesLikeThis, ClassNamesLikeThis`
+ - `function () {`
+* name your anounymous functions ➙ debugging
+* avoid `new Object` (➙ `{}`) && `new Array`(➙ `[]`)
+ 
+<br>
+
+➙ [style guides](https://github.com/rwaldron/idiomatic.js)
+
+### BE CONSISTENT
+</script></section>
+
+<!-------- chapter: good parts  ----------------->
+
+<section data-markdown data-state="rev-bg-green"><script type="text/template">
+# Good parts
+</script></section>
+
+<section data-markdown><script type="text/template">
+###  Functions as first-class citizens
+
+<br>
+
+```
+var rost = {
+	lab: function() { alert('hi'); }
+}
+rost.lab();
+```
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## prototype inheritance 
+
+* `prototype` property
+* `constructor` property
+
+➙ Mixins
+
+```
+var yourMixins = {
+	dummyMethod: function(){
+		console.log("Hello world");
+	}
+}
+_.extend( YourAwesomeClass.prototype, yourMixins);
+```
+
+</script></section>
+
+
+
+<section data-markdown><script type="text/template">
+## Closures
+  
+```
+function rost(name){
+	var location = "munich";
+	function lab(){
+		return location + "-" + name;
+	}
+	return lab;
+}
+var f = rost("foo");
+f(); // munich - foo
+f.location = 'berlin';
+f(); // berlin - foo
+```
+</script></section>
+
+<section data-markdown><script type="text/template">
+###  Functional programming
+
+* `map`
+* `reduce`
+* `filter`
+  
+➙ Underscore / Loadash
+
+```
+var arr = [0,1,2,3,4]; 
+arr = arr.filter(function(el){ return el % 2 == 0 }); // [0,2,4]
+arr = arr.map(function(el){ return el +1 }); // [1,3,5]
+arr.reduce(function(memo,el){ // sum
+	return memo + el;
+}) // 9
+```
+</script></section>
+
+<section data-markdown><script type="text/template">
+## JSON
+
+JavaScript Object Notation  
+  
+* `JSON.parse(obj)`
+* `JSON.stringify(obj)`
+
+```
+"course": {
+	"chair": "RostLab",
+	teachers: ["Tatyana Goldberg", "Juan Miguel Cejuela"],
+	"location": {
+		"postcode": "85748",
+		"city": "Garching"
+	}
+}
+```
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Node & NPM  
+  
+<img class="no-shadow" src=img/nodejs-logo.png>
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## CS  & ES6
+
+Iterators
+
+```
+var entry;
+while (!(entry = arr.values().next()).done) {
+    console.log(entry.value);
+}
+```
+
+</script></section>
+
+<!-------- chapter: performance ----------------->
+
+<section data-markdown data-state="rev-bg-pink"><script type="text/template">
+#  Performance
+</script></section>
+
+<section data-markdown><script type="text/template">
+## DOM reflows
+  
+happens when
+  
+* When you __add__ or __remove__ a DOM node.
+* When you __apply a style__ dynamically (e.g. `element.style.width="10px"`)
+* When you __retrieve a measurement__ that must be calculated (e.g. `offsetWidth`, `clientHeight`)  
+
+<br>
+➙ __avoid__ reflows (expensive operations!)
+
+</script></section>
+
+<section data-markdown><script type="text/template">
+## Performance tricks
+  
+* use __`DocumentFragemts`__
+* __out-of-the-flow__ [DOM manipulation](https://developers.google.com/speed/articles/javascript-dom)  
+* don't define functions in loops
+* avoid memory leaks
+* test bottlenecks on e.g. [jsperf.com](http://jsperf.com)
+* [Chrome's profiling tools](https://developers.google.com/chrome-developer-tools/docs/profiles) are awesome
+  
+<br>
+[more][js-perf]
+
+[js-perf]: http://www.smashingmagazine.com/2012/11/05/writing-fast-memory-efficient-javascript/
+</script></section>
+
+
+<section data-markdown><script type="text/template">
+## Github
+
+<img class="no-shadow vert-align" height="400px" src=img/octocat.png />
+<img class="no-shadow vert-align" height="200px" src=img/social_coding.png />
+
+</script></section>
+
+</div>
+</div>
+
+
+<script src=external/code-example.js></script>
+<script>
+  var revealCodeSamples = codeExamples.revealAlongside.bind(null,"script[type=code-example-alongside]");
+</script>
+
+<script src=external/little-console.js></script>
+<script>
+  // little console from @timruffles
+  function showConsoles() {
+
+    // show all consoles, and register 'cheats'
+    var cheats = [];
+
+    ;[].forEach.call(document.querySelectorAll(".little-console"),function(el) {
+      var cmds = new LittleConsole.Commands;
+      var console = new LittleConsole({el: el,commands: cmds});
+      var slide = el.parentElement;
+      var cheat = slide.querySelector("[type=cheat]");
+      if(!cheat) return;
+      cheats.push({
+        console: console,
+        slide: slide,
+        src: cheat.innerHTML,
+      });
+    });
+
+    // listen for 'cheat code' - ALT + C, and fill input
+    var C = 67;
+    document.body.addEventListener("keyup",function(evt) {
+      if(evt.keyCode !== C || !evt.altKey) return;
+      var slide = Reveal.getCurrentSlide();
+      cheats.forEach(function(setup) {
+        if(setup.slide !== slide) return;
+        setup.console.setCommand(setup.src);
+      });
+
+    });
+
+  }
+</script>
+
+<script src="reveal.js/lib/js/head.min.js"></script>
+<script src="reveal.js/js/reveal.min.js"></script>
+<script>
+  Reveal.initialize({
+
+    // Display controls in the bottom right corner
+    controls: false,
+
+    // Display a presentation progress bar
+    progress: true,
+
+    // Push each slide change to the browser history
+    history: true,
+
+    // Enable keyboard shortcuts for navigation
+    keyboard: true,
+
+    // Enable the slide overview mode
+    overview: true,
+
+    // Vertical centering of slides
+    center: false,
+
+    // Loop the presentation
+    loop: false,
+
+    // Change the presentation direction to be RTL
+    rtl: false,
+
+    // Number of milliseconds between automatically proceeding to the
+    // next slide, disabled when set to 0, this value can be overwritten
+    // by using a data-autoslide attribute on your slides
+    autoSlide: 0,
+
+    // Enable slide navigation via mouse wheel
+    mouseWheel: false,
+
+    // Apply a 3D roll to links on hover
+    rollingLinks: false,
+
+    // Transition style
+    transition: 'fade', // default/cube/page/concave/zoom/linear/fade/none
+
+    dependencies: [
+        // Cross-browser shim that fully implements classList - https://github.com/eligrey/classList.js/
+        { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+
+        // Interreveal.js/pret Markdown in <section> elements
+        { src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        { src: 'reveal.js/plugin/markdown/markdown.js', 
+          condition: function() { return !!document.querySelector( '[data-markdown]' ); },
+          callback: function() {
+            revealCodeSamples(); 
+            showConsoles();
+          } },
+
+        // Syntareveal.js/x highlight for <code> elements
+        { src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+
+        // Zoom reveal.js/in and out with Alt+click
+        { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+
+        // Speakreveal.js/er notes
+        //{ src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+
+        // Remotreveal.js/e control your reveal.js presentation using a touch device
+        // { src: 'reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+    ]
+
+  });
+</script>
+<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+<script>
+if( window.location.search.match( /print-pdf/gi ) ) {
+  var link = document.createElement( 'link' );
+  link.rel = 'stylesheet'; //link.type = 'text/css'; link.media = 'print';
+  link.href = 'reveal.js/css/print/pdf.css';
+  document.getElementsByTagName( 'head' )[0].appendChild( link );
+  document.body.style.background = "white";
+}
+</script>
+</body>
+
+
