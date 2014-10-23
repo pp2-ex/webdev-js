@@ -34,7 +34,10 @@
 </script>
 </span>
 <span id="antimail"></span>
+<a id="forkme" href="https://github.com/pp2-ex/webdev-js"><img style="position: absolute; top: 0; right: 0; border: 0;" src="img/forkme.png" alt="Fork me on GitHub" data-canonical-src="img/forkme.png"></a>
+
 <script type="text/javascript">
+// simple spam blocker
 function antimail(name,domain,tld,subject){
 	var a = document.createElement("a");
 	var mail = name + "@" + domain + "." + tld;
@@ -43,6 +46,8 @@ function antimail(name,domain,tld,subject){
 	return a;
 }
 document.getElementById("antimail").appendChild(antimail("seb","wilzba", "ch"));
+// make fork me absolute
+document.body.appendChild(document.getElementById("forkme"));
 </script>
 </section>
 
